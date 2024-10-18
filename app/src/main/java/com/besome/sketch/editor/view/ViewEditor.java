@@ -1,5 +1,9 @@
 package com.besome.sketch.editor.view;
 
+import static mod.Edward.KOC.IconCustomWidget.AddCustomWidgets;
+import static mod.Edward.KOC.IconCustomWidget.DeleteWidgetMap;
+import static mod.Edward.KOC.IconCustomWidget.SubstringCovert;
+
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -61,6 +65,7 @@ import a.a.a.uy;
 import a.a.a.wB;
 import a.a.a.wq;
 import a.a.a.xB;
+import mod.Edward.KOC.IconCustomWidget;
 import mod.hey.studios.editor.view.IdGenerator;
 import mod.hey.studios.util.Helper;
 import mod.hey.studios.util.ProjectFile;
@@ -213,37 +218,14 @@ public class ViewEditor extends RelativeLayout implements View.OnClickListener, 
     }
 
     private void showPaletteFavorite() {
-        paletteWidget.animate()
-                .alpha(0f)
-                .setDuration(100)
-                .withEndAction(() -> {
-                    paletteWidget.setVisibility(View.GONE);
-                    paletteFavorite.setAlpha(0f);
-                    paletteFavorite.setVisibility(View.VISIBLE);
-                    paletteFavorite.animate()
-                            .alpha(1f)
-                            .setDuration(100)
-                            .start();
-                })
-                .start();
+        paletteWidget.setVisibility(View.GONE);
+        paletteFavorite.setVisibility(View.VISIBLE);
     }
 
     private void showPaletteWidget() {
-        paletteFavorite.animate()
-                .alpha(0f)
-                .setDuration(100)
-                .withEndAction(() -> {
-                    paletteFavorite.setVisibility(View.GONE);
-                    paletteWidget.setAlpha(0f);
-                    paletteWidget.setVisibility(View.VISIBLE);
-                    paletteWidget.animate()
-                            .alpha(1f)
-                            .setDuration(100)
-                            .start();
-                })
-                .start();
+        paletteWidget.setVisibility(View.VISIBLE);
+        paletteFavorite.setVisibility(View.GONE);
     }
-
 
     @Override
     public void onClick(View view) {
@@ -358,6 +340,10 @@ public class ViewEditor extends RelativeLayout implements View.OnClickListener, 
                     deleteWidgetFromCollection(collectionWidget.getName());
                     break lol;
                 }
+                if (D && r instanceof IconCustomWidget) {
+                    DeleteWidgetMap(getContext(), (int) view.getTag());
+                    break lol;
+                }
                 viewPane.resetView(false);
                 if (r instanceof uy uyVar) {
                     ArrayList<ViewBean> arrayList = new ArrayList<>();
@@ -392,17 +378,17 @@ public class ViewEditor extends RelativeLayout implements View.OnClickListener, 
                     if (areImagesAdded) {
                         bB.a(getContext(), xB.b().a(getContext(), R.string.view_widget_favorites_image_auto_added), bB.TOAST_NORMAL).show();
                     }
-                    if (!arrayList.isEmpty()) {
+                    if (arrayList.size() > 0) {
                         HashMap<String, String> hashMap = new HashMap<>();
                         viewPane.a(arrayList.get(0), (int) motionEvent.getRawX(), (int) motionEvent.getRawY());
                         for (ViewBean next : arrayList) {
                             if (jC.a(a).h(projectFileBean.getXmlName(), next.id)) {
-                                hashMap.put(next.id, a(next.type));
+                                hashMap.put(next.id, a(next.type, null));
                             } else {
                                 hashMap.put(next.id, next.id);
                             }
                             next.id = hashMap.get(next.id);
-                            if (arrayList.indexOf(next) != 0 && (str = next.parent) != null && !str.isEmpty()) {
+                            if (arrayList.indexOf(next) != 0 && (str = next.parent) != null && str.length() > 0) {
                                 next.parent = hashMap.get(next.parent);
                             }
                             jC.a(a).a(b, next);
@@ -510,12 +496,12 @@ public class ViewEditor extends RelativeLayout implements View.OnClickListener, 
         k.setBackgroundColor(0xff0084c2);
         k.setOrientation(LinearLayout.HORIZONTAL);
         k.setGravity(Gravity.CENTER_VERTICAL);
-        k.setLayoutParams(new FrameLayout.LayoutParams(displayWidth, (int) (f * 25f)));
+        k.setLayoutParams(new FrameLayout.LayoutParams(displayWidth, (int) (f * 25.0f)));
         fileName = new TextView(context);
         fileName.setTextColor(Color.WHITE);
         fileName.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        fileName.setPadding((int) (f * 8f), 0, 0, 0);
+        fileName.setPadding((int) (f * 8.0f), 0, 0, 0);
         fileName.setGravity(Gravity.CENTER_VERTICAL);
         k.addView(fileName);
         imgPhoneTopBg = new ImageView(context);
@@ -574,6 +560,7 @@ public class ViewEditor extends RelativeLayout implements View.OnClickListener, 
     public void removeWidgetsAndLayouts() {
         paletteWidget.removeWidgetLayouts();
         paletteWidget.removeWidgets();
+        AddCustomWidgets(getContext(), paletteWidget);
     }
 
     public sy e(ViewBean viewBean) {
@@ -633,7 +620,7 @@ public class ViewEditor extends RelativeLayout implements View.OnClickListener, 
         dummyView.a(r, u, v, u, v);
         dummyView.a(G);
         if (isViewAnIconBase(r)) {
-            if (r instanceof uy) {
+            if (r instanceof uy || r instanceof IconCustomWidget) {
                 b(true);
                 viewPane.addRootLayout(null);
             } else {
@@ -721,9 +708,9 @@ public class ViewEditor extends RelativeLayout implements View.OnClickListener, 
     }
 
     private void setPreviewColors(String str) {
-        k.setBackgroundColor(ProjectFile.getColor(str, ProjectFile.COLOR_PRIMARY_DARK));
-        imgPhoneTopBg.setBackgroundColor(ProjectFile.getColor(str, ProjectFile.COLOR_PRIMARY_DARK));
-        toolbar.setBackgroundColor(ProjectFile.getColor(str, ProjectFile.COLOR_PRIMARY));
+        k.setBackgroundColor(ProjectFile.getColor(str, "color_primary_dark"));
+        imgPhoneTopBg.setBackgroundColor(ProjectFile.getColor(str, "color_primary_dark"));
+        toolbar.setBackgroundColor(ProjectFile.getColor(str, "color_primary"));
     }
 
     private void b(boolean z) {
@@ -884,8 +871,8 @@ public class ViewEditor extends RelativeLayout implements View.OnClickListener, 
         a2.setOnTouchListener(this);
     }
 
-    public final String a(int i) {
-        String b2 = wq.b(i);
+    public final String a(int i, String convert) {
+        String b2 = convert == null ? wq.b(i) : SubstringCovert(convert);
         StringBuilder sb = new StringBuilder();
         sb.append(b2);
         int i2 = e[i] + 1;
@@ -1021,4 +1008,20 @@ public class ViewEditor extends RelativeLayout implements View.OnClickListener, 
             setOnClickListener(this);
         }
     }
+
+    public void CreateCustomWidget(HashMap<String, Object> map) {
+        View extraWidget = paletteWidget.CustomWidget(map);
+        extraWidget.setClickable(true);
+        Object position = map.get("position");
+        int tagValue = 0;
+        if (position instanceof Integer) {
+            tagValue = (Integer) position;
+        } else if (position instanceof Double) {
+            tagValue = ((Double) position).intValue();
+        }
+
+        extraWidget.setTag(tagValue);
+        extraWidget.setOnTouchListener(this);
+    }
+
 }
