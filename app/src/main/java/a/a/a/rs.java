@@ -47,6 +47,7 @@ import java.util.Set;
 import mod.hey.studios.moreblock.ReturnMoreblockManager;
 import mod.hey.studios.moreblock.importer.MoreblockImporterDialog;
 import mod.jbk.editor.manage.MoreblockImporter;
+import pro.sketchware.utility.SketchwareUtil;
 
 public class rs extends qA implements View.OnClickListener, MoreblockImporterDialog.CallBack {
 
@@ -314,14 +315,27 @@ public class rs extends qA implements View.OnClickListener, MoreblockImporterDia
         }
     }
 
-    private void openEvent(String targetId, String eventId, String description) {
+    private void openEvent(EventBean eventBean, String description) {
         Intent intent = new Intent(requireActivity(), LogicEditorActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra("sc_id", sc_id);
-        intent.putExtra("id", targetId);
-        intent.putExtra("event", eventId);
+        intent.putExtra("id", eventBean.targetId);
+        intent.putExtra("event", eventBean.eventName);
         intent.putExtra("project_file", currentActivity);
         intent.putExtra("event_text", description);
+        if (eventBean.eventType == EventBean.EVENT_TYPE_COMPONENT) {
+            ArrayList<ComponentBean> componentBeans = jC.a(sc_id).e(currentActivity.getJavaName());
+            for (ComponentBean componentBean : componentBeans) {
+                if (componentBean.type == ComponentBean.COMPONENT_TYPE_CUSTOM_VIEW) {
+                    ArrayList<EventBean> addedEvents = jC.a(jC.a(sc_id).a).a(currentActivity.getJavaName(), componentBean);
+                    for (EventBean eBean : addedEvents) {
+                        if (eBean.equals(eventBean)) {
+                            intent.putExtra("customView", componentBean.param1);
+                        }
+                    }
+                }
+            }
+        }
         openEvent.launch(intent);
     }
 
@@ -546,7 +560,7 @@ public class rs extends qA implements View.OnClickListener, MoreblockImporterDia
                 root.setOnClickListener(v -> {
                     if (!mB.a()) {
                         EventBean eventBean = events.get(getPaletteIndex()).get(getLayoutPosition());
-                        openEvent(eventBean.targetId, eventBean.eventName, description.getText().toString());
+                        openEvent(eventBean, description.getText().toString());
                     }
                 });
             }

@@ -1495,6 +1495,10 @@ public class LogicEditorActivity extends BaseAppCompatActivity implements View.O
             }
         }
 
+        if (getIntent().hasExtra("customView")) {
+            xmlName = getIntent().getStringExtra("customView") + ".xml";
+        }
+
         dialog.b(getTranslatedString(R.string.logic_editor_title_select_view));
         ArrayList<ViewBean> views = jC.a(B).d(xmlName);
         for (ViewBean viewBean : views) {

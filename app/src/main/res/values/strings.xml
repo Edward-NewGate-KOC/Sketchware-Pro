@@ -2226,5 +2226,6 @@ Please try again later"</string>
     <string name="add_to">Add to category</string>
 
     <string name="used_custom_blocks">Used Custom Blocks</string>
+    <string name="component_description_custom_view">" easy customView management for use in alert dialogs, bottom sheets, toasts, and more..."</string>
 
 </resources>

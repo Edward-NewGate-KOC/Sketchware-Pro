@@ -1026,6 +1026,7 @@ public class ManageEvent {
 
     public static String i(String targetId, String eventName) {
         return switch (eventName) {
+            case "onCustomViewCreated" -> "onCustomViewCreated";
             case "onUpdateProfileComplete", "onEmailVerificationSent", "onDeleteUserComplete",
                  "onUpdateEmailComplete", "onGoogleSignIn", "onUpdatePasswordComplete",
                  "signInWithPhoneAuthComplete" ->

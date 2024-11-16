@@ -8,10 +8,13 @@ import android.hardware.Sensor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -42,6 +45,7 @@ import a.a.a.jC;
 import a.a.a.mB;
 import a.a.a.uq;
 import a.a.a.wB;
+import pro.sketchware.databinding.PropertyPopupSelectorSingleBinding;
 import pro.sketchware.lib.DebouncedClickListener;
 import mod.hey.studios.util.Helper;
 import mod.hilal.saif.components.ComponentsHandler;
@@ -131,7 +135,9 @@ public class ComponentAddActivity extends BaseDialogActivity implements View.OnC
                 }
                 jC.a(sc_id).a(projectFileBean.getJavaName(), componentType, componentId, binding.edInputFilePicker.getText().toString());
                 break;
-
+            case ComponentBean.COMPONENT_TYPE_CUSTOM_VIEW:
+                jC.a(sc_id).a(projectFileBean.getJavaName(), componentType, componentId, binding.edInputFilename.getText().toString());
+                break;
             default:
                 jC.a(sc_id).a(projectFileBean.getJavaName(), componentType, componentId);
         }
@@ -270,6 +276,7 @@ public class ComponentAddActivity extends BaseDialogActivity implements View.OnC
         super.onPostCreate(savedInstanceState);
         componentList = new ArrayList<>();
         componentList.add(new ComponentBean(ComponentBean.COMPONENT_TYPE_INTENT));
+        componentList.add(new ComponentBean(ComponentBean.COMPONENT_TYPE_CUSTOM_VIEW));
         componentList.add(new ComponentBean(ComponentBean.COMPONENT_TYPE_SHAREDPREF));
         componentList.add(new ComponentBean(ComponentBean.COMPONENT_TYPE_CALENDAR));
         componentList.add(new ComponentBean(ComponentBean.COMPONENT_TYPE_VIBRATOR));
@@ -370,6 +377,12 @@ public class ComponentAddActivity extends BaseDialogActivity implements View.OnC
             case ComponentBean.COMPONENT_TYPE_FILE_PICKER:
                 Helper.setViewsVisibility(false, binding.tvDescFilePicker, binding.layoutInputFilePicker);
                 break;
+            case ComponentBean.COMPONENT_TYPE_CUSTOM_VIEW:
+                Helper.setViewsVisibility(false, binding.tiInputFilename);
+                binding.tiInputFilename.setHint("Select a customView");
+                binding.edInputFilename.setFocusable(false);
+                binding.edInputFilename.setOnClickListener(view -> showCustomViewSelectorDialog());
+                break;
         }
         binding.imgIcon.setImageResource(ComponentBean.getIconResource(componentBean.type));
         binding.tvComponentTitle.setText(ComponentBean.getComponentName(getApplicationContext(), componentBean.type));
@@ -384,6 +397,56 @@ public class ComponentAddActivity extends BaseDialogActivity implements View.OnC
         binding.layoutInputs.animate().alpha(1.0f).translationY(LayoutParams.FLEX_GROW_DEFAULT).start();
         binding.addButton.animate().setStartDelay(150).alpha(1.0f).start();
         binding.docsButton.animate().setStartDelay(150).alpha(1.0f).start();
+    }
+
+    private void showCustomViewSelectorDialog() {
+        aB dialog = new aB(this);
+        dialog.b(Helper.getResString(R.string.property_custom_view_listview));
+        PropertyPopupSelectorSingleBinding dialogBinding = PropertyPopupSelectorSingleBinding.inflate(getLayoutInflater());
+        ArrayList<String> menus = new ArrayList<>();
+        for (ProjectFileBean projectFileBean : jC.b(sc_id).c()) {
+            menus.add(projectFileBean.fileName);
+        }
+        for (String menuArg : menus) {
+            dialogBinding.rgContent.addView(radioButton(menuArg));
+        }
+
+        String val = binding.edInputFilename.getText().toString();
+        if (!val.isEmpty()) {
+            for (int i = 0; i < dialogBinding.rgContent.getChildCount(); i++) {
+                if (dialogBinding.rgContent.getChildAt(i) instanceof RadioButton rb) {
+                    if (val.equals(rb.getText().toString())) {
+                        rb.setChecked(true);
+                        break;
+                    }
+                }
+            }
+        }
+
+        dialog.b(Helper.getResString(R.string.common_word_select), v -> {
+            for (int i = 0; i < dialogBinding.rgContent.getChildCount(); i++) {
+                if (dialogBinding.rgContent.getChildAt(i) instanceof RadioButton rb) {
+                    if (rb.isChecked()) {
+                        binding.edInputFilename.setText(rb.getText().toString());
+                    }
+                }
+            }
+            dialog.dismiss();
+        });
+
+        dialog.a(dialogBinding.getRoot());
+        dialog.show();
+    }
+
+    public final RadioButton radioButton(String str) {
+        RadioButton radioButton = new RadioButton(this);
+        radioButton.setText(str);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.topMargin = (int) wB.a(this, 4.0f);
+        layoutParams.bottomMargin = (int) wB.a(this, 4.0f);
+        radioButton.setGravity(Gravity.CENTER | Gravity.LEFT);
+        radioButton.setLayoutParams(layoutParams);
+        return radioButton;
     }
 
     /**

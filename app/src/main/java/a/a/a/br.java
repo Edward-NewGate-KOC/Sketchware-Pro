@@ -110,7 +110,7 @@ public class br extends qA implements View.OnClickListener {
         projectFile = projectFileBean;
     }
 
-    private void openEvent(String targetId, String eventName, String eventText) {
+    private void openEvent(String targetId, String eventName, String eventText, ComponentBean componentBean) {
         Intent intent = new Intent(requireActivity().getApplicationContext(), LogicEditorActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra("sc_id", sc_id);
@@ -118,6 +118,9 @@ public class br extends qA implements View.OnClickListener {
         intent.putExtra("event", eventName);
         intent.putExtra("project_file", projectFile);
         intent.putExtra("event_text", eventText);
+        if (componentBean.type == ComponentBean.COMPONENT_TYPE_CUSTOM_VIEW) {
+            intent.putExtra("customView", componentBean.param1);
+        }
         startActivity(intent);
     }
 
@@ -194,7 +197,7 @@ public class br extends qA implements View.OnClickListener {
                     manager.setRecycleChildrenOnDetach(true);
                 }
                 binding.componentEvents.setItemAnimator(null);
-                AddedEventsAdapter addedEventsAdapter = new AddedEventsAdapter();
+                AddedEventsAdapter addedEventsAdapter = new AddedEventsAdapter(componentBean);
                 AvailableEventsAdapter availableEventsAdapter = new AvailableEventsAdapter();
                 availableEventsAdapter.setOnEventClickListener(event -> {
                     var newAddedEvents = new ArrayList<>(addedEventsAdapter.getCurrentList());
@@ -203,7 +206,7 @@ public class br extends qA implements View.OnClickListener {
                     var newAvailableEvents = new ArrayList<>(availableEventsAdapter.getCurrentList());
                     newAvailableEvents.remove(event.eventName);
                     availableEventsAdapter.submitList(newAvailableEvents);
-                    openEvent(event.targetId, event.eventName, event.eventName);
+                    openEvent(event.targetId, event.eventName, event.eventName, componentBean);
                 });
                 ConcatAdapter componentEventsAdapter = new ConcatAdapter(
                         EVENTS_ADAPTER_CONFIG, addedEventsAdapter, availableEventsAdapter);
@@ -358,6 +361,9 @@ public class br extends qA implements View.OnClickListener {
             }
 
             private class AddedEventsAdapter extends ListAdapter<EventBean, EventViewHolder> {
+
+                private final ComponentBean componentBean;
+
                 private static final DiffUtil.ItemCallback<EventBean> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
                     @Override
                     public boolean areItemsTheSame(@NonNull EventBean oldItem, @NonNull EventBean newItem) {
@@ -370,8 +376,9 @@ public class br extends qA implements View.OnClickListener {
                     }
                 };
 
-                public AddedEventsAdapter() {
+                public AddedEventsAdapter(ComponentBean componentBean) {
                     super(DIFF_CALLBACK);
+                    this.componentBean = componentBean;
                 }
 
                 @NonNull
@@ -389,7 +396,7 @@ public class br extends qA implements View.OnClickListener {
                     holder.button.getIcon().setImageResource(oq.a(event.eventName));
                     holder.button.setClickListener(v -> {
                         if (!mB.a()) {
-                            openEvent(event.targetId, event.eventName, event.eventName);
+                            openEvent(event.targetId, event.eventName, event.eventName, componentBean);
                         }
                     });
                 }

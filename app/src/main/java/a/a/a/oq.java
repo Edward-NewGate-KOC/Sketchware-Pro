@@ -68,6 +68,7 @@ public class oq {
             case "onFilesPickedCancel" -> R.drawable.event_on_file_picked_cancel_48dp;
             case "onResponse" -> R.drawable.event_on_response_48dp;
             case "onErrorResponse" -> R.drawable.event_on_error_response_48dp;
+            case "onCustomViewCreated" -> R.drawable.code_48;
             case "onSpeechResult" -> R.drawable.event_on_speech_result;
             case "onSpeechError" -> R.drawable.event_on_speech_error;
             case "onConnected" -> R.drawable.event_on_connected_96;
@@ -135,6 +136,7 @@ public class oq {
             case "onFilesPickedCancel" -> Helper.getResString(R.string.event_onfilespickedcancel);
             case "onResponse" -> Helper.getResString(R.string.event_on_response);
             case "onErrorResponse" -> Helper.getResString(R.string.event_on_error_response);
+            case "onCustomViewCreated" -> "onCustomViewCreated";
             case "onSpeechResult" -> Helper.getResString(R.string.event_on_speech_result);
             case "onSpeechError" -> Helper.getResString(R.string.event_on_speech_error);
             case "onConnected" -> Helper.getResString(R.string.event_on_connected);
@@ -209,6 +211,9 @@ public class oq {
         if (classInfo.a("RequestNetwork")) {
             eventList.add("onResponse");
             eventList.add("onErrorResponse");
+        }
+        if (classInfo.a("customView")) {
+            eventList.add("onCustomViewCreated");
         }
 
         if (classInfo.a("SpeechToText")) {
@@ -313,6 +318,10 @@ public class oq {
             eventList.add("requestListener");
         }
 
+        if (classInfo.a("customView")) {
+            eventList.add("onCustomViewCreated");
+        }
+
         if (classInfo.a("SpeechToText")) {
             eventList.add("recognitionListener");
         }
@@ -401,6 +410,9 @@ public class oq {
             case "requestListener" -> {
                 eventList.add("onResponse");
                 eventList.add("onErrorResponse");
+            }
+            case "onCustomViewCreated" -> {
+                eventList.add("onCustomViewCreated");
             }
             case "recognitionListener" -> {
                 eventList.add("onSpeechResult");

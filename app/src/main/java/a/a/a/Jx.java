@@ -1,12 +1,15 @@
 package a.a.a;
 
+import static com.besome.sketch.beans.ComponentBean.COMPONENT_TYPE_CUSTOM_VIEW;
 import static dev.aldi.sayuti.block.ExtraBlockFile.getExtraBlockData;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.besome.sketch.beans.BlockBean;
 import com.besome.sketch.beans.ComponentBean;
+import com.besome.sketch.beans.EventBean;
 import com.besome.sketch.beans.ProjectFileBean;
 import com.besome.sketch.beans.ViewBean;
 
@@ -497,6 +500,33 @@ public class Jx {
             eventManager.a("onBackPressed", "DrawerLayout", "_drawer");
         }
 
+        ArrayList<ComponentBean> componentBeans = projectDataManager.e(projectFileBean.getJavaName());
+        for (ComponentBean componentBean : componentBeans) {
+            if (componentBean.type == COMPONENT_TYPE_CUSTOM_VIEW) {
+                ArrayList<EventBean> addedEvents = jC.a(projectDataManager.a).a(projectFileBean.getJavaName(), componentBean);
+                for (EventBean eventBean : addedEvents) {
+                    ArrayList<BlockBean> eventLogicBlocks = jC.a(projectDataManager.a).a(projectFileBean.getJavaName(), eventBean.targetId + "_" + eventBean.eventName);
+                    String eventLogic = (eventLogicBlocks == null || eventLogicBlocks.isEmpty()) ? "" :
+                            new Fx(projectFileBean.getActivityName(), buildConfig, eventBean.eventName, eventLogicBlocks).a();
+                    sb.append(String.format("""
+                            private void _show_%s_alertDialog() {
+                            final AlertDialog _dialog = new AlertDialog.Builder(this).create();
+                            View _inflate = getLayoutInflater().inflate(R.layout.%s, null);
+                            _dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                            _dialog.setView(_inflate);
+                            
+                            %s
+                            
+                            %s
+                            
+                            _dialog.show();
+                            }
+                            """, componentBean.componentId, componentBean.param1, inflateCustomViewWidgets(componentBean.param1), eventLogic));
+                }
+
+            }
+        }
+
         ArrayList<ViewBean> beans = projectDataManager.d(projectFileBean.getXmlName());
         for (ViewBean next : beans) {
             if (next.type == ViewBean.VIEW_TYPE_WIDGET_MAPVIEW) {
@@ -581,6 +611,26 @@ public class Jx {
         return CommandBlock.CB(Lx.j(code, false));
     }
 
+    private String inflateCustomViewWidgets(String customView) {
+        StringBuilder valueBuilder = new StringBuilder();
+        for (ViewBean view : projectDataManager.d(ProjectFileBean.getXmlName(customView))) {
+            valueBuilder.append(String.format("""
+                    final %s %s = _inflate.findViewById(R.id.%2$s);
+                    """,
+                    getViewName(view.convert), view.id));
+        }
+
+        return valueBuilder.toString();
+    }
+
+    public static String getViewName(String convert) {
+        int lastIndex = convert.lastIndexOf('.');
+        if (lastIndex != -1) {
+            convert = convert.substring(lastIndex + 1);
+        }
+        return convert;
+    }
+
     private String getListDeclarationAndAddImports(int listType, String listName) {
         String typeName = mq.b(listType);
         addImports(mq.getImportsByTypeName(typeName, null));
@@ -588,6 +638,9 @@ public class Jx {
     }
 
     private String getComponentDeclarationAndAddImports(ComponentBean componentBean) {
+        if (componentBean.type == COMPONENT_TYPE_CUSTOM_VIEW) {
+            return "";
+        }
         String typeName = mq.a(componentBean.type);
         addImports(mq.getImportsByTypeName(typeName, null));
         return Lx.a(typeName, componentBean.componentId, Lx.AccessModifier.PRIVATE, componentBean.param1, componentBean.param2, componentBean.param3);
