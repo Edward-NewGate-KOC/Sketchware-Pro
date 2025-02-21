@@ -12,24 +12,20 @@ if (analyticsEnabled) {
 android {
     compileSdk 35
 
-    def gitCommitHash = "git rev-parse HEAD".execute().text.trim()
-
-    def shortCommitHash = "git rev-parse --short HEAD".execute().text.trim()
-
     defaultConfig {
         applicationId "pro.sketchware"
         namespace "pro.sketchware"
         //noinspection ExpiredTargetSdkVersion since we don't target getting Sketchware Pro on Google Play.
         targetSdkVersion 28
         versionCode 150
-        versionName "v7.0.0-SNAPSHOT-" + shortCommitHash
+        versionName "v7.0.0-beta-01"
 
-        buildConfigField("String", "GIT_HASH", "\"${gitCommitHash}\"")
+        buildConfigField("String", "GIT_HASH", "\"7413cadcb81f2b3ac49449c632bf1536fb57ba7f\"")
 
         buildConfigField("String", "FLAVOR_NAME_WITH_AABS", "\"minApi26\"")
         buildConfigField("String", "FLAVOR_NAME_WITHOUT_AABS", "\"minApi21\"")
 
-        buildConfigField("String", "VERSION_NAME_WITHOUT_FLAVOR", "\"v7.0.0-SNAPSHOT-${shortCommitHash}\"")
+        buildConfigField("String", "VERSION_NAME_WITHOUT_FLAVOR", "\"v7.0.0-beta-01\"")
 
         buildConfigField("String", "SKETCHUB_API_KEY", "\"${System.getenv("SKETCHUB_API_KEY")}\"")
     }
